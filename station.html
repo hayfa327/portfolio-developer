@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hayfa Safa — Tunnelbana</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100vw;height:100vh;overflow:hidden;background:#000;font-family:'Poppins',sans-serif;font-weight:300;cursor:none;color:#f5ede0}
+#cur{position:fixed;width:10px;height:10px;border-radius:50%;background:#f5c518;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference}
+#cur-r{position:fixed;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(245,197,24,.35);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .18s,height .18s}
+
+/* ─── SCREENS ─────────────────────────────── */
+.screen{position:fixed;inset:0;opacity:0;pointer-events:none;transition:opacity .9s ease}
+.screen.active{opacity:1;pointer-events:all}
+
+/* ─── TUNNEL ENGINE ───────────────────────── */
+.tunnel{position:absolute;inset:0;overflow:hidden}
+
+/* The arch — barrel vault ceiling using CSS */
+.arch{
+  position:absolute;
+  left:-10%;right:-10%;
+  top:-20%;
+  height:75%;
+  border-radius:0 0 50% 50% / 0 0 60% 60%;
+  z-index:2;
+  pointer-events:none;
+}
+
+/* Track floor — perspective lines to vanishing point */
+.track-floor{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:38%;
+  z-index:3;
+  overflow:hidden;
+}
+
+/* Platform — the standing area */
+.platform{
+  position:absolute;
+  bottom:0;
+  z-index:4;
+  height:38%;
+}
+.platform.left{left:0;width:22%}
+.platform.right{right:0;width:22%}
+
+/* Platform edge stripe */
+.platform::after{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  left:0;
+  height:4px;
+  background:#f5c518;
+}
+.platform.left::after{left:auto;width:100%}
+.platform.right::after{right:auto;width:100%}
+
+/* Tunnel mouth — the dark depth at far end */
+.tunnel-depth{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-60%);
+  width:18%;
+  height:28%;
+  background:radial-gradient(ellipse at center,#000 40%,transparent 100%);
+  border-radius:50%;
+  z-index:1;
+}
+
+/* Ceiling lights — strip running to vanishing point */
+.lights-strip{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:100%;
+  z-index:3;
+  pointer-events:none;
+}
+
+/* Wall sign — SL blue rectangle */
+.sl-sign{
+  position:absolute;
+  background:#1a5eb0;
+  padding:5px 16px;
+  border-radius:2px;
+  z-index:10;
+}
+.sl-sign span{
+  font-size:.65rem;
+  color:#fff;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+/* Back button */
+.back{
+  position:absolute;
+  top:16px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  background:rgba(0,0,0,.55);
+  border:1px solid rgba(245,197,24,.2);
+  color:rgba(245,197,24,.5);
+  font-family:'Poppins',sans-serif;
+  font-size:.52rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  padding:7px 18px;
+  cursor:pointer;
+  border-radius:2px;
+  transition:all .25s;
+}
+.back:hover{background:rgba(0,0,0,.85);color:#f5c518;border-color:rgba(245,197,24,.5)}
+
+/* Content panel — centered floating card */
+.panel-wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:15;
+  pointer-events:none;
+}
+.panel{
+  pointer-events:all;
+  max-height:80vh;
+  width:min(480px,80vw);
+  overflow-y:auto;
+  animation:panelIn .6s cubic-bezier(.22,1,.36,1) forwards;
+}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:rgba(245,197,24,.3)}
+@keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ══════════════════════════════════════
+   SCREEN 1 — T-CENTRALEN  (Departure)
+   Blue hand-painted vines on white rock
+══════════════════════════════════════ */
+#s-board .arch{background:linear-gradient(180deg,#c8c0b8 0%,#d8d0c4 40%,#e0d8cc 70%,transparent 100%)}
+#s-board .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 220px 100px at 15% 35%,#b8b0a8 0%,transparent 65%),
+    radial-gradient(ellipse 200px 90px at 45% 25%,#c0b8b0 0%,transparent 65%),
+    radial-gradient(ellipse 240px 110px at 75% 38%,#b0a8a0 0%,transparent 65%),
+    radial-gradient(ellipse 180px 80px at 92% 22%,#c8c0b8 0%,transparent 65%);
+}
+#s-board .platform{background:#ccc4b8}
+#s-board .platform.left::before,#s-board .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,#d0c8bc 0%,#b8b0a8 100%);
+}
+#s-board .track-floor{background:linear-gradient(180deg,#1a1810 0%,#0a0804 100%)}
+/* Blue vine SVG overlay on ceiling */
+#board-vines{position:absolute;top:0;left:0;width:100%;height:55%;z-index:5;pointer-events:none}
+/* Departure board */
+.dep-board{
+  background:#0a0a08;
+  border-radius:3px;
+  overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,.7);
+  width:min(500px,88vw);
+}
+.dep-header{
+  background:#141410;
+  padding:11px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #222018;
+}
+.dep-title{font-size:.56rem;letter-spacing:.24em;color:#c8a040;font-weight:500;text-transform:uppercase}
+.dep-sub{font-size:.5rem;letter-spacing:.18em;color:#4a4838;text-transform:uppercase;margin-top:2px}
+.dep-sl{width:26px;height:26px;border:2px solid #2050a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#6090d0;font-weight:700;flex-shrink:0}
+.dep-row{
+  display:grid;
+  grid-template-columns:62px 1fr auto;
+  align-items:center;
+  gap:12px;
+  padding:11px 18px;
+  border-bottom:1px solid #161410;
+  cursor:pointer;
+  transition:background .2s;
+}
+.dep-row:last-child{border-bottom:none}
+.dep-row:hover{background:#181610}
+.dep-row.hl{background:#1c1a0e}
+.dep-time{font-size:.7rem;font-weight:500;letter-spacing:.06em}
+.dep-time.now{color:#f5c518;animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.dep-time.soon{color:#b0a898}
+.dep-name{font-size:.9rem;color:#f0e8d8;margin-bottom:2px;font-weight:400}
+.dep-desc{font-size:.56rem;color:#5a5040;letter-spacing:.04em}
+.dep-badge{font-size:.48rem;padding:3px 9px;border-radius:10px;letter-spacing:.1em;font-weight:600;text-transform:uppercase;white-space:nowrap}
+.badge-red{background:#7a1208;color:#ffb0a0}
+.badge-blue{background:#0c2860;color:#90c0ff}
+.badge-green{background:#0c2810;color:#90d890}
+/* Name above board */
+.board-name{text-align:center;margin-bottom:18px}
+.board-name-h{font-style:italic;font-size:clamp(1.4rem,3vw,2rem);color:#1a1208;font-weight:300;letter-spacing:-.01em}
+.board-name-s{font-size:.5rem;letter-spacing:.28em;color:#8a8070;text-transform:uppercase;margin-top:3px}
+
+/* ══════════════════════════════════════
+   SCREEN 2 — RÅDHUSET (Theatre)
+   Raw red rock, blasted ceiling
+══════════════════════════════════════ */
+#s-theatre .arch{background:linear-gradient(180deg,#6B1208 0%,#8B1A0A 45%,#9a1e0c 70%,transparent 100%)}
+#s-theatre .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 200px 100px at 12% 40%,#7a1208 0%,transparent 65%),
+    radial-gradient(ellipse 240px 120px at 38% 30%,#9a1e0c 0%,transparent 65%),
+    radial-gradient(ellipse 260px 130px at 65% 38%,#7a1208 0%,transparent 65%),
+    radial-gradient(ellipse 200px 90px at 88% 25%,#8a1808 0%,transparent 65%),
+    radial-gradient(ellipse 180px 80px at 50% 55%,#5a0e06 0%,transparent 55%);
+}
+#s-theatre .platform{background:#5a0e06}
+#s-theatre .platform.left::before,#s-theatre .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 150px 200px at 60% 0%,#7a1208 0%,#4a0a04 100%);
+}
+#s-theatre .track-floor{background:linear-gradient(180deg,#120604 0%,#060200 100%)}
+#s-theatre .tunnel-depth{background:radial-gradient(ellipse at center,#000 50%,#1a0404 100%)}
+/* rock crack lines on walls */
+#s-theatre .platform.left::after,#s-theatre .platform.right::after{background:#f5c518;opacity:.5}
+/* Spotlight cone */
+#th-spot{
+  position:absolute;
+  top:5%;left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:160px solid transparent;
+  border-right:160px solid transparent;
+  border-top:350px solid rgba(255,200,80,.04);
+  z-index:6;
+  pointer-events:none;
+}
+/* Playbill */
+.playbill{
+  background:#f5ede0;
+  border-radius:2px;
+  overflow:hidden;
+  box-shadow:0 30px 90px rgba(0,0,0,.8);
+}
+.pb-top{background:#1a0f08;padding:14px 20px;text-align:center}
+.pb-over{font-size:.48rem;letter-spacing:.26em;color:#c8a040;text-transform:uppercase;margin-bottom:4px}
+.pb-title{font-size:1.3rem;color:#f5ede0;font-weight:300;font-style:italic}
+.pb-body{padding:16px 20px;max-height:50vh;overflow-y:auto}
+.pb-body::-webkit-scrollbar{width:3px}
+.pb-body::-webkit-scrollbar-thumb{background:#d8c8b0}
+.pb-lbl{font-size:.46rem;letter-spacing:.22em;color:#8a7858;text-transform:uppercase;margin:10px 0 6px;font-weight:500}
+.pb-p{font-size:.7rem;color:#3a2a1a;line-height:1.85}
+.pb-quote{font-style:italic;font-size:.75rem;color:#4a3520;border-left:2px solid #c8a040;padding-left:10px;margin:10px 0;line-height:1.75}
+.tl-row{display:grid;grid-template-columns:3.5rem 1fr;gap:8px;padding:6px 0;border-bottom:1px solid #ece0ce}
+.tl-row:last-child{border-bottom:none}
+.tl-yr{font-size:.54rem;color:#8a7858;letter-spacing:.06em;padding-top:2px}
+.tl-ro{font-size:.68rem;color:#2a1a0a;font-weight:500;margin-bottom:1px}
+.tl-de{font-size:.6rem;color:#6a5a48;line-height:1.6}
+.pb-btn{display:block;width:100%;padding:10px;background:#1a0f08;border:none;color:#c8a040;font-family:'Poppins',sans-serif;font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .2s;text-align:center}
+.pb-btn:hover{background:#2a1a10;color:#f5c518}
+
+/* ══════════════════════════════════════
+   SCREEN 3 — T-CENTRALEN BLUE (Dev)
+══════════════════════════════════════ */
+#s-dev .arch{background:linear-gradient(180deg,#0d2040 0%,#1a3060 40%,#2040a0 65%,transparent 100%)}
+#s-dev .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 220px 100px at 15% 38%,#182858 0%,transparent 65%),
+    radial-gradient(ellipse 200px 90px at 42% 28%,#2040a0 0%,transparent 60%),
+    radial-gradient(ellipse 240px 110px at 70% 35%,#1a3070 0%,transparent 65%),
+    radial-gradient(ellipse 180px 80px at 90% 22%,#182858 0%,transparent 65%);
+}
+#s-dev .platform{background:#0d1830}
+#s-dev .platform.left::before,#s-dev .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 150px 200px at 60% 0%,#1a2848 0%,#080c18 100%);
+}
+#s-dev .track-floor{background:linear-gradient(180deg,#060810 0%,#020408 100%)}
+#s-dev .tunnel-depth{background:radial-gradient(ellipse at center,#000 50%,#040818 100%)}
+#s-dev .platform.left::after,#s-dev .platform.right::after{background:#f5c518;opacity:.4}
+/* Terminal card */
+.term-card{background:#060810;border:1px solid #1a2850;border-radius:4px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.8)}
+.term-bar{background:#0d1428;padding:9px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #1a2850}
+.tdot{width:9px;height:9px;border-radius:50%}
+.term-title{font-size:.54rem;letter-spacing:.16em;color:#3a5880;margin-left:auto;text-transform:uppercase}
+.term-body{padding:14px 16px;max-height:52vh;overflow-y:auto}
+.term-body::-webkit-scrollbar{width:3px}
+.term-body::-webkit-scrollbar-thumb{background:#1a2850}
+.tl2{display:block;font-size:.68rem;line-height:2;font-family:'Courier New',monospace}
+.c-p{color:#6090d0}.c-c{color:#3a5880}.c-v{color:#90d890}.c-s{color:#c0a060}.c-k{color:#c060c0}.c-n{color:#60b0d0}
+.proj-row{display:grid;grid-template-columns:1.8rem 1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid #0e1828;align-items:center;cursor:pointer;text-decoration:none;transition:background .15s}
+.proj-row:hover{background:rgba(26,40,80,.3)}
+.proj-row:last-child{border-bottom:none}
+.pn{font-size:.8rem;color:#1e3060;font-style:italic}
+.pt{font-size:.7rem;color:#b0c8e8;margin-bottom:1px}
+.ps{font-size:.54rem;color:#3a5880}
+.pa{font-size:.7rem;color:#2a4070;transition:all .2s}
+.proj-row:hover .pa{color:#6090d0;transform:translateX(3px)}
+.term-btn{display:block;width:100%;margin-top:8px;padding:9px;background:#0d1428;border:1px solid #1a2850;color:#4a6aaa;font-family:'Poppins',sans-serif;font-size:.54rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center;border-radius:3px}
+.term-btn:hover{background:#141e3a;color:#90c0ff}
+
+/* ══════════════════════════════════════
+   SCREEN 4 — KUNGSTRÄDGÅRDEN (Artist)
+   Dark green cave, archaeological
+══════════════════════════════════════ */
+#s-artist .arch{background:linear-gradient(180deg,#061008 0%,#0d2010 40%,#183818 65%,transparent 100%)}
+#s-artist .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 220px 100px at 14% 40%,#0d1e0a 0%,transparent 65%),
+    radial-gradient(ellipse 200px 90px at 40% 28%,#1a3818 0%,transparent 60%),
+    radial-gradient(ellipse 240px 110px at 68% 38%,#102010 0%,transparent 65%),
+    radial-gradient(ellipse 190px 85px at 90% 22%,#0d1e0a 0%,transparent 65%),
+    radial-gradient(ellipse 300px 60px at 50% 65%,#061008 0%,transparent 55%);
+}
+#s-artist .platform{background:#071008}
+#s-artist .platform.left::before,#s-artist .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 150px 200px at 60% 0%,#102010 0%,#040804 100%);
+}
+#s-artist .track-floor{background:linear-gradient(180deg,#040804 0%,#020402 100%)}
+#s-artist .tunnel-depth{background:radial-gradient(ellipse at center,#000 50%,#030804 100%)}
+#s-artist .platform.left::after,#s-artist .platform.right::after{background:#3a8030;opacity:.7}
+/* Artist card */
+.art-card{background:rgba(6,16,8,.9);border:1px solid #1a3818;border-radius:3px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.85)}
+.art-head{padding:14px 18px;text-align:center;border-bottom:1px solid #0e2010}
+.art-over{font-size:.48rem;letter-spacing:.26em;color:#4a8040;text-transform:uppercase;margin-bottom:5px}
+.art-title{font-size:1.3rem;color:#f0ead8;font-weight:300;font-style:italic}
+.art-title em{color:#7ac870}
+.art-body{padding:14px 18px;max-height:52vh;overflow-y:auto}
+.art-body::-webkit-scrollbar{width:3px}
+.art-body::-webkit-scrollbar-thumb{background:#1a3818}
+.art-quote{font-style:italic;font-size:.72rem;color:rgba(245,237,224,.55);border-left:2px solid #2a6020;padding-left:10px;margin-bottom:12px;line-height:1.8}
+.art-tl{display:flex;flex-direction:column}
+.at-row{display:grid;grid-template-columns:3.8rem 1fr;gap:8px;padding:7px 0;border-bottom:1px solid #0d1e0a}
+.at-row:last-child{border-bottom:none}
+.at-yr{font-size:.52rem;color:#3a6030;letter-spacing:.08em;padding-top:2px}
+.at-ro{font-size:.7rem;color:#e0d8c8;font-weight:400;margin-bottom:1px}
+.at-de{font-size:.6rem;color:rgba(245,237,224,.4);line-height:1.6}
+.art-btn{display:block;width:100%;padding:9px;background:rgba(14,40,14,.6);border:none;border-top:1px solid #0e2010;color:#4a8040;font-family:'Poppins',sans-serif;font-size:.54rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center}
+.art-btn:hover{background:#0e2810;color:#7ac870}
+
+/* ══════════════════════════════════════
+   SCREEN 5 — SOLNA CENTRUM (Contact)
+   Dramatic red-orange warm light
+══════════════════════════════════════ */
+#s-contact .arch{background:linear-gradient(180deg,#1a0804 0%,#3a1008 40%,#c84010 65%,transparent 100%)}
+#s-contact .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 300px 120px at 50% 75%,#e86020 0%,transparent 60%),
+    radial-gradient(ellipse 200px 90px at 18% 45%,#c84010 0%,transparent 65%),
+    radial-gradient(ellipse 180px 80px at 82% 38%,#c84010 0%,transparent 65%),
+    radial-gradient(ellipse 160px 70px at 12% 22%,#3a1008 0%,transparent 70%),
+    radial-gradient(ellipse 140px 60px at 88% 18%,#3a1008 0%,transparent 70%);
+}
+#s-contact .platform{background:#1a0804}
+#s-contact .platform.left::before,#s-contact .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 150px 200px at 60% 0%,#3a1008 0%,#0a0402 100%);
+}
+#s-contact .track-floor{background:linear-gradient(180deg,#0e0402 0%,#060200 100%)}
+#s-contact .tunnel-depth{background:radial-gradient(ellipse at center,#000 50%,#0a0200 100%)}
+#s-contact .platform.left::after,#s-contact .platform.right::after{background:#e86020;opacity:.4}
+/* warm glow on arch */
+#s-contact .arch::after{
+  content:'';position:absolute;bottom:0;left:20%;right:20%;height:40%;
+  background:radial-gradient(ellipse at 50% 100%,rgba(232,96,32,.12) 0%,transparent 70%);
+}
+/* Contact card */
+.cont-card{
+  background:rgba(10,4,2,.88);
+  border:1px solid rgba(200,64,16,.2);
+  border-radius:3px;
+  padding:22px 24px;
+  box-shadow:0 30px 90px rgba(0,0,0,.85);
+}
+.cont-over{font-size:.5rem;letter-spacing:.26em;color:#9a4820;text-transform:uppercase;margin-bottom:12px;text-align:center}
+.cont-msg{font-style:italic;font-size:clamp(.95rem,2.2vw,1.35rem);color:#f0e8d8;line-height:1.65;margin-bottom:20px;font-weight:300;text-align:center}
+.cont-msg em{color:#e8a060}
+.cont-r{display:grid;grid-template-columns:5rem 1fr;gap:10px;padding:7px 0;border-bottom:1px solid rgba(200,64,16,.12);align-items:baseline}
+.cont-r:first-of-type{border-top:1px solid rgba(200,64,16,.12)}
+.cont-l{font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;color:#5a2810}
+.cont-v a{font-size:.72rem;color:rgba(245,237,224,.55);text-decoration:none;transition:color .2s;border-bottom:1px solid transparent;padding-bottom:1px}
+.cont-v a:hover{color:#e8a060;border-bottom-color:#e8a060}
+.avail{display:inline-flex;align-items:center;gap:6px;font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:#7ac870;margin-top:10px}
+.adot{width:5px;height:5px;border-radius:50%;background:#7ac870;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.cont-back{display:block;width:100%;margin-top:12px;padding:9px;background:rgba(58,16,8,.5);border:1px solid rgba(200,64,16,.25);color:#804020;font-family:'Poppins',sans-serif;font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;text-align:center;transition:all .2s;border-radius:2px}
+.cont-back:hover{background:rgba(58,16,8,.9);color:#e8a060}
+
+/* Ceiling light strips — shared */
+.light-strip{
+  position:absolute;
+  z-index:8;
+  pointer-events:none;
+}
+/* Panel in animation */
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.anim{animation:up .65s cubic-bezier(.22,1,.36,1) forwards}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- ══ S1: DEPARTURE BOARD (T-Centralen blue) ══ -->
+<div class="screen active" id="s-board">
+  <div class="tunnel">
+    <!-- Arch ceiling with blue painted vines -->
+    <div class="arch">
+      <!-- Vines painted on rock -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;border-radius:inherit" viewBox="0 0 1400 500" preserveAspectRatio="none">
+        <!-- rock texture -->
+        <filter id="rock"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise"/><feColorMatrix type="matrix" values="0 0 0 0 0.72  0 0 0 0 0.68  0 0 0 0 0.64  0 0 0 -0.5 1.5" in="noise"/></filter>
+        <rect width="1400" height="500" filter="url(#rock)" opacity="0.25"/>
+        <!-- Blue vine stems -->
+        <g fill="none" stroke="#2050a0" stroke-width="2" opacity="0.65">
+          <path d="M0,320 Q140,180 280,260 Q420,340 560,200 Q700,60 840,180 Q980,300 1120,160 Q1260,20 1400,120"/>
+          <path d="M0,380 Q180,260 360,340 Q540,420 720,280 Q900,140 1080,260 Q1260,380 1400,300"/>
+          <path d="M0,240 Q100,120 200,190 Q300,260 400,140 Q500,20 600,100 Q700,180 800,80 Q900,-20 1000,60 Q1100,140 1200,60 Q1300,-20 1400,40"/>
+        </g>
+        <!-- Blue flowers -->
+        <g fill="#1840a0" opacity="0.7">
+          <ellipse cx="120" cy="240" rx="18" ry="10"/>
+          <ellipse cx="280" cy="280" rx="16" ry="9"/>
+          <ellipse cx="440" cy="200" rx="18" ry="10"/>
+          <ellipse cx="620" cy="160" rx="16" ry="9"/>
+          <ellipse cx="800" cy="180" rx="18" ry="10"/>
+          <ellipse cx="960" cy="140" rx="16" ry="9"/>
+          <ellipse cx="1120" cy="120" rx="18" ry="10"/>
+          <ellipse cx="1300" cy="140" rx="16" ry="9"/>
+        </g>
+        <!-- Flower petals at intervals -->
+        <g fill="#1840a0" opacity="0.6">
+          <!-- flower 1 -->
+          <circle cx="280" cy="220" r="10"/><circle cx="280" cy="204" r="7"/><circle cx="294" cy="212" r="7"/><circle cx="294" cy="228" r="7"/><circle cx="266" cy="212" r="7"/><circle cx="266" cy="228" r="7"/>
+          <!-- flower 2 -->
+          <circle cx="700" cy="130" r="10"/><circle cx="700" cy="114" r="7"/><circle cx="714" cy="122" r="7"/><circle cx="714" cy="138" r="7"/><circle cx="686" cy="122" r="7"/><circle cx="686" cy="138" r="7"/>
+          <!-- flower 3 -->
+          <circle cx="1100" cy="100" r="10"/><circle cx="1100" cy="84" r="7"/><circle cx="1114" cy="92" r="7"/><circle cx="1114" cy="108" r="7"/><circle cx="1086" cy="92" r="7"/><circle cx="1086" cy="108" r="7"/>
+        </g>
+      </svg>
+    </div>
+    <!-- Platform -->
+    <div class="platform left"></div>
+    <div class="platform right"></div>
+    <!-- Track floor -->
+    <div class="track-floor">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+        <!-- Rail tracks converging to center -->
+        <line x1="350" y1="0" x2="0" y2="300" stroke="#2a2818" stroke-width="4"/>
+        <line x1="650" y1="0" x2="1000" y2="300" stroke="#2a2818" stroke-width="4"/>
+        <line x1="430" y1="0" x2="80" y2="300" stroke="#1a1808" stroke-width="2"/>
+        <line x1="570" y1="0" x2="920" y2="300" stroke="#1a1808" stroke-width="2"/>
+        <!-- Sleepers -->
+        <line x1="340" y1="30" x2="660" y2="30" stroke="#1a1808" stroke-width="3"/>
+        <line x1="310" y1="70" x2="690" y2="70" stroke="#1a1808" stroke-width="3"/>
+        <line x1="270" y1="120" x2="730" y2="120" stroke="#1a1808" stroke-width="3"/>
+        <line x1="220" y1="180" x2="780" y2="180" stroke="#1a1808" stroke-width="3"/>
+        <line x1="150" y1="250" x2="850" y2="250" stroke="#1a1808" stroke-width="3"/>
+      </svg>
+    </div>
+    <!-- Tunnel depth -->
+    <div class="tunnel-depth"></div>
+    <!-- Ceiling strip lights -->
+    <svg class="light-strip" style="top:0;left:0;right:0;width:100%;height:55%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+      <line x1="500" y1="0" x2="200" y2="300" stroke="rgba(255,255,220,.04)" stroke-width="80"/>
+      <rect x="440" y="8" width="120" height="10" rx="3" fill="rgba(255,255,220,.18)"/>
+      <rect x="455" y="55" width="90" height="8" rx="3" fill="rgba(255,255,220,.14)"/>
+      <rect x="462" y="95" width="76" height="6" rx="2" fill="rgba(255,255,220,.1)"/>
+      <rect x="468" y="128" width="64" height="5" rx="2" fill="rgba(255,255,220,.07)"/>
+    </svg>
+    <!-- Station signs on platforms -->
+    <div class="sl-sign" style="bottom:calc(38% + 12px);left:18px"><span>T-CENTRALEN</span></div>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);right:18px"><span>T-CENTRALEN</span></div>
+  </div>
+  <!-- Departure board -->
+  <div class="panel-wrap" style="z-index:15">
+    <div class="panel anim">
+      <div class="board-name">
+        <div class="board-name-h">Hayfa Safa</div>
+        <div class="board-name-s">Frontend Developer · Theatre Artist · Stockholm</div>
+      </div>
+      <div class="dep-board">
+        <div class="dep-header">
+          <div>
+            <div class="dep-title">Avgångstavla · Next Departures</div>
+            <div class="dep-sub">Välj din destination — Choose your destination</div>
+          </div>
+          <div class="dep-sl">T</div>
+        </div>
+        <div class="dep-row hl" onclick="goTo('theatre')">
+          <div class="dep-time now">NU</div>
+          <div><div class="dep-name">Theatre</div><div class="dep-desc">Where my creative journey began</div></div>
+          <div class="dep-badge badge-red">Red Line</div>
+        </div>
+        <div class="dep-row" onclick="goTo('dev')">
+          <div class="dep-time soon">2 min</div>
+          <div><div class="dep-name">Dev Studio</div><div class="dep-desc">Code, projects and prototypes</div></div>
+          <div class="dep-badge badge-blue">Blue Line</div>
+        </div>
+        <div class="dep-row" onclick="goTo('artist')">
+          <div class="dep-time soon">4 min</div>
+          <div><div class="dep-name">Artist</div><div class="dep-desc">Performances, direction and voice</div></div>
+          <div class="dep-badge badge-green">Green Line</div>
+        </div>
+        <div class="dep-row" onclick="goTo('contact')">
+          <div class="dep-time soon">6 min</div>
+          <div><div class="dep-name">Contact</div><div class="dep-desc">Every destination begins with a conversation</div></div>
+          <div class="dep-badge badge-red">Red Line</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S2: RÅDHUSET — Theatre ══ -->
+<div class="screen" id="s-theatre">
+  <div class="tunnel">
+    <div class="arch">
+      <svg style="position:absolute;inset:0;width:100%;height:100%;border-radius:inherit" viewBox="0 0 1400 500" preserveAspectRatio="none">
+        <filter id="rock2"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="4" result="n"/><feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.08  0 0 0 0 0.03  0 0 0 -0.3 1.4" in="n"/></filter>
+        <rect width="1400" height="500" filter="url(#rock2)" opacity="0.5"/>
+        <!-- Rock crack lines -->
+        <g stroke="#4a0a04" stroke-width="1.5" fill="none" opacity="0.6">
+          <path d="M100,80 Q180,140 140,220 Q100,300 160,380 Q220,460 180,500"/>
+          <path d="M380,40 Q430,110 400,190 Q370,270 420,350"/>
+          <path d="M700,60 Q780,130 750,220 Q720,310 790,400"/>
+          <path d="M1050,30 Q1100,100 1070,180 Q1040,260 1090,340 Q1140,420 1110,500"/>
+          <path d="M1280,70 Q1330,150 1300,240 Q1270,330 1320,420"/>
+        </g>
+      </svg>
+    </div>
+    <div class="platform left"></div>
+    <div class="platform right"></div>
+    <div class="track-floor">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+        <line x1="350" y1="0" x2="0" y2="300" stroke="#1a0604" stroke-width="4"/>
+        <line x1="650" y1="0" x2="1000" y2="300" stroke="#1a0604" stroke-width="4"/>
+        <line x1="430" y1="0" x2="80" y2="300" stroke="#120402" stroke-width="2"/>
+        <line x1="570" y1="0" x2="920" y2="300" stroke="#120402" stroke-width="2"/>
+        <line x1="340" y1="30" x2="660" y2="30" stroke="#120402" stroke-width="3"/>
+        <line x1="300" y1="80" x2="700" y2="80" stroke="#120402" stroke-width="3"/>
+        <line x1="250" y1="140" x2="750" y2="140" stroke="#120402" stroke-width="3"/>
+        <line x1="180" y1="210" x2="820" y2="210" stroke="#120402" stroke-width="3"/>
+        <line x1="80" y1="280" x2="920" y2="280" stroke="#120402" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="tunnel-depth"></div>
+    <div id="th-spot"></div>
+    <!-- Warm amber ceiling light -->
+    <svg class="light-strip" style="top:0;left:0;right:0;width:100%;height:55%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+      <line x1="500" y1="0" x2="200" y2="300" stroke="rgba(255,180,60,.03)" stroke-width="120"/>
+      <rect x="440" y="10" width="120" height="8" rx="3" fill="rgba(255,200,80,.12)"/>
+      <rect x="455" y="50" width="90" height="6" rx="3" fill="rgba(255,200,80,.09)"/>
+      <rect x="464" y="85" width="72" height="5" rx="2" fill="rgba(255,200,80,.06)"/>
+      <rect x="470" y="115" width="60" height="4" rx="2" fill="rgba(255,200,80,.04)"/>
+    </svg>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);left:18px;background:#8B1A0A"><span>THEATRE</span></div>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);right:18px;background:#8B1A0A"><span>THEATRE</span></div>
+  </div>
+  <button class="back" onclick="goTo('board')">← Avgångstavla</button>
+  <div class="panel-wrap">
+    <div class="panel anim" id="p-theatre">
+      <div class="playbill">
+        <div class="pb-top">
+          <div class="pb-over">Rådhuset · Red Line · Theatre Station</div>
+          <div class="pb-title">The First Stage</div>
+        </div>
+        <div class="pb-body">
+          <div class="pb-lbl">The story</div>
+          <div class="pb-p">Before code, there was the stage. I hold a Master's in Theatre & Acting from the Lebanese University and have directed, performed, and founded arts organisations across Lebanon, Tunisia and Sweden.</div>
+          <div class="pb-quote">"Theatre taught me how to hold an audience — and how to know when to let silence speak."</div>
+          <div class="pb-lbl">Productions</div>
+          <div class="tl-row"><div class="tl-yr">2025</div><div><div class="tl-ro">Art Residency — Sweden</div><div class="tl-de">swan_residency_network · Scenstudio Gerlesborg</div></div></div>
+          <div class="tl-row"><div class="tl-yr">2024</div><div><div class="tl-ro">Jogging Shows Tour</div><div class="tl-de">Spain · France · Portugal</div></div></div>
+          <div class="tl-row"><div class="tl-yr">2023</div><div><div class="tl-ro">Anana — World Dance Company</div><div class="tl-de">Gothenburg · Sufi choreography · International Dance Day</div></div></div>
+          <div class="tl-row"><div class="tl-yr">2022</div><div><div class="tl-ro">SURVIVORS — Arabiska Theater</div><div class="tl-de">Asst. Director · Founded Artists for Justice, Sweden</div></div></div>
+          <div class="tl-row"><div class="tl-yr">2021</div><div><div class="tl-ro">National Theatre Tunisia</div><div class="tl-de">Director · "I Hate Cinema" · "On Every Color, My Dear"</div></div></div>
+          <div class="tl-row"><div class="tl-yr">2017–19</div><div><div class="tl-ro">Baylasan NGO — Shatila Camp</div><div class="tl-de">Founder · Theatre with refugees, Lebanon</div></div></div>
+          <div class="tl-row"><div class="tl-yr">2014–21</div><div><div class="tl-ro">Teaching Theatre</div><div class="tl-de">1,500+ students across Lebanon</div></div></div>
+        </div>
+        <button class="pb-btn" onclick="goTo('board')">← Back to Departures</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S3: T-CENTRALEN — Dev Studio ══ -->
+<div class="screen" id="s-dev">
+  <div class="tunnel">
+    <div class="arch">
+      <svg style="position:absolute;inset:0;width:100%;height:100%;border-radius:inherit" viewBox="0 0 1400 500" preserveAspectRatio="none">
+        <filter id="rock3"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="n3"/><feColorMatrix type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.16  0 0 0 0 0.38  0 0 0 -0.3 1.4" in="n3"/></filter>
+        <rect width="1400" height="500" filter="url(#rock3)" opacity="0.4"/>
+        <!-- Blue vine pattern (T-Centralen signature) -->
+        <g fill="none" stroke="#2a5090" stroke-width="2.5" opacity="0.55">
+          <path d="M0,380 Q200,220 400,320 Q600,420 800,280 Q1000,140 1200,240 Q1350,310 1400,260"/>
+          <path d="M0,300 Q150,160 300,240 Q450,320 600,180 Q750,40 900,140 Q1050,240 1200,140 Q1320,60 1400,100"/>
+          <path d="M0,440 Q250,300 500,400 Q750,500 1000,360 Q1200,260 1400,340"/>
+        </g>
+        <g fill="#2050a0" opacity="0.55">
+          <ellipse cx="200" cy="280" rx="20" ry="11"/>
+          <ellipse cx="480" cy="230" rx="18" ry="10"/>
+          <ellipse cx="760" cy="180" rx="20" ry="11"/>
+          <ellipse cx="1040" cy="160" rx="18" ry="10"/>
+          <ellipse cx="1300" cy="180" rx="20" ry="11"/>
+          <!-- Flowers -->
+          <circle cx="340" cy="240" r="12"/><circle cx="340" cy="222" r="8"/><circle cx="356" cy="232" r="8"/><circle cx="356" cy="252" r="8"/><circle cx="324" cy="232" r="8"/><circle cx="324" cy="252" r="8"/>
+          <circle cx="900" cy="140" r="12"/><circle cx="900" cy="122" r="8"/><circle cx="916" cy="132" r="8"/><circle cx="916" cy="152" r="8"/><circle cx="884" cy="132" r="8"/><circle cx="884" cy="152" r="8"/>
+        </g>
+      </svg>
+    </div>
+    <div class="platform left"></div>
+    <div class="platform right"></div>
+    <div class="track-floor">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+        <line x1="350" y1="0" x2="0" y2="300" stroke="#0a1020" stroke-width="4"/>
+        <line x1="650" y1="0" x2="1000" y2="300" stroke="#0a1020" stroke-width="4"/>
+        <line x1="430" y1="0" x2="80" y2="300" stroke="#060810" stroke-width="2"/>
+        <line x1="570" y1="0" x2="920" y2="300" stroke="#060810" stroke-width="2"/>
+        <line x1="340" y1="30" x2="660" y2="30" stroke="#060810" stroke-width="3"/>
+        <line x1="300" y1="80" x2="700" y2="80" stroke="#060810" stroke-width="3"/>
+        <line x1="250" y1="140" x2="750" y2="140" stroke="#060810" stroke-width="3"/>
+        <line x1="180" y1="210" x2="820" y2="210" stroke="#060810" stroke-width="3"/>
+        <line x1="80" y1="280" x2="920" y2="280" stroke="#060810" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="tunnel-depth"></div>
+    <svg class="light-strip" style="top:0;left:0;right:0;width:100%;height:55%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+      <rect x="440" y="8" width="120" height="9" rx="3" fill="rgba(220,240,255,.15)"/>
+      <rect x="455" y="52" width="90" height="7" rx="3" fill="rgba(220,240,255,.10)"/>
+      <rect x="464" y="88" width="72" height="5" rx="2" fill="rgba(220,240,255,.07)"/>
+      <rect x="470" y="118" width="60" height="4" rx="2" fill="rgba(220,240,255,.05)"/>
+    </svg>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);left:18px;background:#1a3a8e"><span>DEV STUDIO</span></div>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);right:18px;background:#1a3a8e"><span>DEV STUDIO</span></div>
+  </div>
+  <button class="back" onclick="goTo('board')">← Avgångstavla</button>
+  <div class="panel-wrap">
+    <div class="panel anim" id="p-dev">
+      <div class="term-card">
+        <div class="term-bar">
+          <div class="tdot" style="background:#ff5f57"></div>
+          <div class="tdot" style="background:#febc2e"></div>
+          <div class="tdot" style="background:#28c840"></div>
+          <div class="term-title">hayfa@dev-studio ~ projects</div>
+        </div>
+        <div class="term-body">
+          <span class="tl2"><span class="c-p">›</span> <span class="c-c">// 6 repositories · Hyper Island 2024–25</span></span>
+          <span class="tl2" style="height:.35rem;display:block"></span>
+          <a class="proj-row" href="https://github.com/hayfa327/BeyondTheWindow" target="_blank" style="text-decoration:none">
+            <div class="pn">01</div><div><div class="pt">Beyond the Window</div><div class="ps">A-Frame · Three.js · Claude API · WebXR</div></div><div class="pa">↗</div>
+          </a>
+          <a class="proj-row" href="https://huemind-ai.vercel.app/" target="_blank" style="text-decoration:none">
+            <div class="pn">02</div><div><div class="pt">HueMind AI</div><div class="ps">React · TypeScript · Gemini 2.5 · Vercel</div></div><div class="pa">↗</div>
+          </a>
+          <a class="proj-row" href="https://github.com/hayfa327" target="_blank" style="text-decoration:none">
+            <div class="pn">03</div><div><div class="pt">Women in Contemporary Art</div><div class="ps">React · Node.js · MongoDB · Full-Stack</div></div><div class="pa">↗</div>
+          </a>
+          <a class="proj-row" href="https://github.com/hayfa327" target="_blank" style="text-decoration:none">
+            <div class="pn">04</div><div><div class="pt">Coffee Shop App</div><div class="ps">HTML5 · CSS3 · JavaScript ES6+</div></div><div class="pa">↗</div>
+          </a>
+          <a class="proj-row" href="https://github.com/hayfa327" target="_blank" style="text-decoration:none">
+            <div class="pn">05</div><div><div class="pt">Logo Animation</div><div class="ps">JavaScript · CSS · Canvas</div></div><div class="pa">↗</div>
+          </a>
+          <a class="proj-row" href="https://github.com/hayfa327" target="_blank" style="text-decoration:none">
+            <div class="pn">06</div><div><div class="pt">Quiz Spin Machine</div><div class="ps">JavaScript · HTML · CSS</div></div><div class="pa">↗</div>
+          </a>
+          <span class="tl2" style="height:.35rem;display:block"></span>
+          <span class="tl2"><span class="c-p">›</span> <span class="c-v">React</span> <span class="c-s">TypeScript</span> <span class="c-n">Next.js</span> <span class="c-k">Node.js</span> <span class="c-v">MongoDB</span></span>
+          <span class="tl2"><span class="c-p">›</span> <span class="c-s">A-Frame</span> <span class="c-n">WebXR</span> <span class="c-k">Claude API</span> <span class="c-v">Gemini 2.5</span> <span class="c-s">Three.js</span></span>
+        </div>
+        <button class="term-btn" onclick="goTo('board')">← Back to Departures</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S4: KUNGSTRÄDGÅRDEN — Artist ══ -->
+<div class="screen" id="s-artist">
+  <div class="tunnel">
+    <div class="arch">
+      <svg style="position:absolute;inset:0;width:100%;height:100%;border-radius:inherit" viewBox="0 0 1400 500" preserveAspectRatio="none">
+        <filter id="rock4"><feTurbulence type="fractalNoise" baseFrequency="0.58" numOctaves="4" result="n4"/><feColorMatrix type="matrix" values="0 0 0 0 0.06  0 0 0 0 0.16  0 0 0 0 0.06  0 0 0 -0.3 1.4" in="n4"/></filter>
+        <rect width="1400" height="500" filter="url(#rock4)" opacity="0.5"/>
+        <g stroke="#1a4018" stroke-width="2" fill="none" opacity="0.5">
+          <path d="M80,60 Q160,140 120,240 Q80,340 140,440"/>
+          <path d="M360,40 Q420,120 390,220 Q360,320 410,420"/>
+          <path d="M700,30 Q780,120 750,230 Q720,340 780,440"/>
+          <path d="M1080,50 Q1130,140 1100,250 Q1070,360 1120,460"/>
+          <path d="M1320,60 Q1370,150 1340,260"/>
+        </g>
+        <g fill="#2a5828" opacity="0.45">
+          <ellipse cx="200" cy="120" rx="24" ry="12"/>
+          <ellipse cx="500" cy="90" rx="22" ry="11"/>
+          <ellipse cx="800" cy="80" rx="24" ry="12"/>
+          <ellipse cx="1100" cy="100" rx="22" ry="11"/>
+          <ellipse cx="140" cy="240" rx="18" ry="9"/>
+          <ellipse cx="400" cy="220" rx="16" ry="8"/>
+          <ellipse cx="700" cy="200" rx="18" ry="9"/>
+          <ellipse cx="1000" cy="210" rx="16" ry="8"/>
+        </g>
+      </svg>
+    </div>
+    <div class="platform left"></div>
+    <div class="platform right"></div>
+    <div class="track-floor">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+        <line x1="350" y1="0" x2="0" y2="300" stroke="#061008" stroke-width="4"/>
+        <line x1="650" y1="0" x2="1000" y2="300" stroke="#061008" stroke-width="4"/>
+        <line x1="430" y1="0" x2="80" y2="300" stroke="#040804" stroke-width="2"/>
+        <line x1="570" y1="0" x2="920" y2="300" stroke="#040804" stroke-width="2"/>
+        <line x1="340" y1="30" x2="660" y2="30" stroke="#040804" stroke-width="3"/>
+        <line x1="300" y1="80" x2="700" y2="80" stroke="#040804" stroke-width="3"/>
+        <line x1="250" y1="140" x2="750" y2="140" stroke="#040804" stroke-width="3"/>
+        <line x1="180" y1="210" x2="820" y2="210" stroke="#040804" stroke-width="3"/>
+        <line x1="80" y1="280" x2="920" y2="280" stroke="#040804" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="tunnel-depth"></div>
+    <svg class="light-strip" style="top:0;left:0;right:0;width:100%;height:55%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+      <rect x="440" y="8" width="120" height="8" rx="3" fill="rgba(200,240,200,.1)"/>
+      <rect x="455" y="50" width="90" height="6" rx="3" fill="rgba(200,240,200,.07)"/>
+      <rect x="464" y="85" width="72" height="5" rx="2" fill="rgba(200,240,200,.05)"/>
+    </svg>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);left:18px;background:#1a5e30"><span>ARTIST</span></div>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);right:18px;background:#1a5e30"><span>ARTIST</span></div>
+  </div>
+  <button class="back" onclick="goTo('board')">← Avgångstavla</button>
+  <div class="panel-wrap">
+    <div class="panel anim">
+      <div class="art-card">
+        <div class="art-head">
+          <div class="art-over">Kungsträdgården · Green Line</div>
+          <div class="art-title">The Other <em>Stage</em></div>
+        </div>
+        <div class="art-body">
+          <div class="art-quote">"I use art as a tool for expression and social change — exploring memory, migration, and transformation."</div>
+          <div class="art-tl">
+            <div class="at-row"><div class="at-yr">2025</div><div><div class="at-ro">Art Residency — Sweden</div><div class="at-de">swan_residency_network · Scenstudio Gerlesborg</div></div></div>
+            <div class="at-row"><div class="at-yr">2024</div><div><div class="at-ro">Jogging Shows Tour</div><div class="at-de">Spain · France · Portugal</div></div></div>
+            <div class="at-row"><div class="at-yr">2023</div><div><div class="at-ro">Anana — World Dance Company</div><div class="at-de">Gothenburg · Sufi dance choreography</div></div></div>
+            <div class="at-row"><div class="at-yr">2022</div><div><div class="at-ro">SURVIVORS — Arabiska Theater</div><div class="at-de">Asst. Director · Founded Artists for Justice</div></div></div>
+            <div class="at-row"><div class="at-yr">2021</div><div><div class="at-ro">National Theatre Tunisia</div><div class="at-de">Director · "I Hate Cinema" · "On Every Color"</div></div></div>
+            <div class="at-row"><div class="at-yr">2017–19</div><div><div class="at-ro">Baylasan NGO — Shatila Camp</div><div class="at-de">Founder · Theatre with refugees, Lebanon</div></div></div>
+            <div class="at-row"><div class="at-yr">2014–21</div><div><div class="at-ro">Teaching Theatre</div><div class="at-de">1,500+ students across Lebanon</div></div></div>
+          </div>
+        </div>
+        <button class="art-btn" onclick="goTo('board')">← Back to Departures</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S5: SOLNA CENTRUM — Contact ══ -->
+<div class="screen" id="s-contact">
+  <div class="tunnel">
+    <div class="arch">
+      <svg style="position:absolute;inset:0;width:100%;height:100%;border-radius:inherit" viewBox="0 0 1400 500" preserveAspectRatio="none">
+        <filter id="rock5"><feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="4" result="n5"/><feColorMatrix type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.12  0 0 0 0 0.03  0 0 0 -0.25 1.35" in="n5"/></filter>
+        <rect width="1400" height="500" filter="url(#rock5)" opacity="0.55"/>
+        <!-- Warm orange glow radiating from center like Solna -->
+        <radialGradient id="warmglow" cx="50%" cy="80%" r="60%">
+          <stop offset="0%" stop-color="#e86020" stop-opacity="0.25"/>
+          <stop offset="60%" stop-color="#c84010" stop-opacity="0.1"/>
+          <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+        </radialGradient>
+        <rect width="1400" height="500" fill="url(#warmglow)"/>
+        <g stroke="#6a1808" stroke-width="1.5" fill="none" opacity="0.5">
+          <path d="M60,50 Q140,130 100,230 Q60,330 120,430"/>
+          <path d="M340,30 Q400,110 370,210 Q340,310 390,410"/>
+          <path d="M700,20 Q780,110 750,220 Q720,330 780,430"/>
+          <path d="M1060,40 Q1120,130 1090,240 Q1060,350 1110,450"/>
+          <path d="M1330,60 Q1380,150 1350,260"/>
+        </g>
+      </svg>
+    </div>
+    <div class="platform left"></div>
+    <div class="platform right"></div>
+    <div class="track-floor">
+      <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+        <line x1="350" y1="0" x2="0" y2="300" stroke="#120402" stroke-width="4"/>
+        <line x1="650" y1="0" x2="1000" y2="300" stroke="#120402" stroke-width="4"/>
+        <line x1="430" y1="0" x2="80" y2="300" stroke="#0a0200" stroke-width="2"/>
+        <line x1="570" y1="0" x2="920" y2="300" stroke="#0a0200" stroke-width="2"/>
+        <line x1="340" y1="30" x2="660" y2="30" stroke="#0a0200" stroke-width="3"/>
+        <line x1="300" y1="80" x2="700" y2="80" stroke="#0a0200" stroke-width="3"/>
+        <line x1="250" y1="140" x2="750" y2="140" stroke="#0a0200" stroke-width="3"/>
+        <line x1="180" y1="210" x2="820" y2="210" stroke="#0a0200" stroke-width="3"/>
+        <line x1="80" y1="280" x2="920" y2="280" stroke="#0a0200" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="tunnel-depth" style="background:radial-gradient(ellipse at center,#000 50%,#0e0200 100%)"></div>
+    <svg class="light-strip" style="top:0;left:0;right:0;width:100%;height:55%" viewBox="0 0 1000 300" preserveAspectRatio="none">
+      <rect x="440" y="8" width="120" height="8" rx="3" fill="rgba(255,180,60,.1)"/>
+      <rect x="455" y="50" width="90" height="6" rx="3" fill="rgba(255,180,60,.07)"/>
+      <rect x="464" y="85" width="72" height="5" rx="2" fill="rgba(255,180,60,.05)"/>
+    </svg>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);left:18px;background:#7a1808"><span>CONTACT</span></div>
+    <div class="sl-sign" style="bottom:calc(38% + 12px);right:18px;background:#7a1808"><span>CONTACT</span></div>
+  </div>
+  <button class="back" onclick="goTo('board')">← Avgångstavla</button>
+  <div class="panel-wrap">
+    <div class="panel anim">
+      <div class="cont-card">
+        <div class="cont-over">Solna Centrum · Final Stop</div>
+        <div class="cont-msg">"Every destination begins<br>with a <em>conversation</em>."</div>
+        <div class="cont-r"><span class="cont-l">Email</span><span class="cont-v"><a href="mailto:haifasafaa@gmail.com">haifasafaa@gmail.com</a></span></div>
+        <div class="cont-r"><span class="cont-l">GitHub</span><span class="cont-v"><a href="https://github.com/hayfa327" target="_blank">github.com/hayfa327</a></span></div>
+        <div class="cont-r"><span class="cont-l">LinkedIn</span><span class="cont-v"><a href="https://www.linkedin.com/in/haifa-safa-665810176/" target="_blank">haifa-safa</a></span></div>
+        <div class="cont-r"><span class="cont-l">Location</span><span class="cont-v"><a>Stockholm, Sweden</a></span></div>
+        <div class="cont-r"><span class="cont-l">Seeking</span><span class="cont-v"><a>Frontend internship · Junior dev role</a></span></div>
+        <div class="cont-r"><span class="cont-l">Live demo</span><span class="cont-v"><a href="https://huemind-ai.vercel.app/" target="_blank">huemind-ai.vercel.app ↗</a></span></div>
+        <div class="avail"><div class="adot"></div>Available for opportunities</div>
+        <button class="cont-back" onclick="goTo('board')">← Back to Departures</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// CURSOR
+const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function ar(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(ar)})();
+document.querySelectorAll('a,button,.dep-row').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='14px';cur.style.height='14px';curR.style.width='46px';curR.style.height='46px'});
+  el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';curR.style.width='32px';curR.style.height='32px'});
+});
+
+// NAV
+const MAP={board:'s-board',theatre:'s-theatre',dev:'s-dev',artist:'s-artist',contact:'s-contact'};
+let cur_screen='board';
+function goTo(id){
+  document.getElementById(MAP[cur_screen]).classList.remove('active');
+  cur_screen=id;
+  const el=document.getElementById(MAP[id]);
+  el.classList.add('active');
+  // restart panel animation
+  el.querySelectorAll('.anim').forEach(a=>{
+    a.style.animation='none';
+    void a.offsetWidth;
+    a.style.animation='';
+  });
+}
+document.addEventListener('keydown',e=>{
+  if(e.code==='Escape'&&cur_screen!=='board') goTo('board');
+});
+</script>
+</body>
+</html>
