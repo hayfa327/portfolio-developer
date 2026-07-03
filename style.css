@@ -1,0 +1,404 @@
+ 
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100vw;height:100vh;overflow:hidden;background:#000;font-family:'Poppins',sans-serif;font-weight:300;cursor:none;color:#f5ede0}
+#cur{position:fixed;width:10px;height:10px;border-radius:50%;background:#f5c518;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference}
+#cur-r{position:fixed;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(245,197,24,.35);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .18s,height .18s}
+
+/* ─── SCREENS ─────────────────────────────── */
+.screen{position:fixed;inset:0;opacity:0;pointer-events:none;transition:opacity .9s ease}
+.screen.active{opacity:1;pointer-events:all}
+
+/* ─── TUNNEL ENGINE ───────────────────────── */
+.tunnel{position:absolute;inset:0;overflow:hidden}
+
+/* The arch — barrel vault ceiling using CSS */
+.arch{
+  position:absolute;
+  left:-10%;right:-10%;
+  top:-20%;
+  height:75%;
+  border-radius:0 0 50% 50% / 0 0 60% 60%;
+  z-index:2;
+  pointer-events:none;
+}
+
+/* Track floor — perspective lines to vanishing point */
+.track-floor{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:38%;
+  z-index:3;
+  overflow:hidden;
+}
+
+/* Platform — the standing area */
+.platform{
+  position:absolute;
+  bottom:0;
+  z-index:4;
+  height:38%;
+}
+.platform.left{left:0;width:22%}
+.platform.right{right:0;width:22%}
+
+/* Platform edge stripe */
+.platform::after{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  left:0;
+  height:4px;
+  background:#f5c518;
+}
+.platform.left::after{left:auto;width:100%}
+.platform.right::after{right:auto;width:100%}
+
+/* Tunnel mouth — the dark depth at far end */
+.tunnel-depth{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-60%);
+  width:18%;
+  height:28%;
+  background:radial-gradient(ellipse at center,#000 40%,transparent 100%);
+  border-radius:50%;
+  z-index:1;
+}
+
+/* Ceiling lights — strip running to vanishing point */
+.lights-strip{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:100%;
+  z-index:3;
+  pointer-events:none;
+}
+
+/* Wall sign — SL blue rectangle */
+.sl-sign{
+  position:absolute;
+  background:#1a5eb0;
+  padding:5px 16px;
+  border-radius:2px;
+  z-index:10;
+}
+.sl-sign span{
+  font-size:.65rem;
+  color:#fff;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+/* Back button */
+.back{
+  position:absolute;
+  top:16px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  background:rgba(0,0,0,.55);
+  border:1px solid rgba(245,197,24,.2);
+  color:rgba(245,197,24,.5);
+  font-family:'Poppins',sans-serif;
+  font-size:.52rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  padding:7px 18px;
+  cursor:pointer;
+  border-radius:2px;
+  transition:all .25s;
+}
+.back:hover{background:rgba(0,0,0,.85);color:#f5c518;border-color:rgba(245,197,24,.5)}
+
+/* Content panel — centered floating card */
+.panel-wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:15;
+  pointer-events:none;
+}
+.panel{
+  pointer-events:all;
+  max-height:80vh;
+  width:min(480px,80vw);
+  overflow-y:auto;
+  animation:panelIn .6s cubic-bezier(.22,1,.36,1) forwards;
+}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:rgba(245,197,24,.3)}
+@keyframes panelIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ══════════════════════════════════════
+   SCREEN 1 — T-CENTRALEN  (Departure)
+   Blue hand-painted vines on white rock
+══════════════════════════════════════ */
+#s-board .arch{background:linear-gradient(180deg,#c8c0b8 0%,#d8d0c4 40%,#e0d8cc 70%,transparent 100%)}
+#s-board .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 220px 100px at 15% 35%,#b8b0a8 0%,transparent 65%),
+    radial-gradient(ellipse 200px 90px at 45% 25%,#c0b8b0 0%,transparent 65%),
+    radial-gradient(ellipse 240px 110px at 75% 38%,#b0a8a0 0%,transparent 65%),
+    radial-gradient(ellipse 180px 80px at 92% 22%,#c8c0b8 0%,transparent 65%);
+}
+#s-board .platform{background:#ccc4b8}
+#s-board .platform.left::before,#s-board .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,#d0c8bc 0%,#b8b0a8 100%);
+}
+#s-board .track-floor{background:linear-gradient(180deg,#1a1810 0%,#0a0804 100%)}
+/* Blue vine SVG overlay on ceiling */
+#board-vines{position:absolute;top:0;left:0;width:100%;height:55%;z-index:5;pointer-events:none}
+/* Departure board */
+.dep-board{
+  background:#0a0a08;
+  border-radius:3px;
+  overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,.7);
+  width:min(500px,88vw);
+}
+.dep-header{
+  background:#141410;
+  padding:11px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #222018;
+}
+.dep-title{font-size:.56rem;letter-spacing:.24em;color:#c8a040;font-weight:500;text-transform:uppercase}
+.dep-sub{font-size:.5rem;letter-spacing:.18em;color:#4a4838;text-transform:uppercase;margin-top:2px}
+.dep-sl{width:26px;height:26px;border:2px solid #2050a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#6090d0;font-weight:700;flex-shrink:0}
+.dep-row{
+  display:grid;
+  grid-template-columns:62px 1fr auto;
+  align-items:center;
+  gap:12px;
+  padding:11px 18px;
+  border-bottom:1px solid #161410;
+  cursor:pointer;
+  transition:background .2s;
+}
+.dep-row:last-child{border-bottom:none}
+.dep-row:hover{background:#181610}
+.dep-row.hl{background:#1c1a0e}
+.dep-time{font-size:.7rem;font-weight:500;letter-spacing:.06em}
+.dep-time.now{color:#f5c518;animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.dep-time.soon{color:#b0a898}
+.dep-name{font-size:.9rem;color:#f0e8d8;margin-bottom:2px;font-weight:400}
+.dep-desc{font-size:.56rem;color:#5a5040;letter-spacing:.04em}
+.dep-badge{font-size:.48rem;padding:3px 9px;border-radius:10px;letter-spacing:.1em;font-weight:600;text-transform:uppercase;white-space:nowrap}
+.badge-red{background:#7a1208;color:#ffb0a0}
+.badge-blue{background:#0c2860;color:#90c0ff}
+.badge-green{background:#0c2810;color:#90d890}
+/* Name above board */
+.board-name{text-align:center;margin-bottom:18px}
+.board-name-h{font-style:italic;font-size:clamp(1.4rem,3vw,2rem);color:#1a1208;font-weight:300;letter-spacing:-.01em}
+.board-name-s{font-size:.5rem;letter-spacing:.28em;color:#8a8070;text-transform:uppercase;margin-top:3px}
+
+/* ══════════════════════════════════════
+   SCREEN 2 — RÅDHUSET (Theatre)
+   Raw red rock, blasted ceiling
+══════════════════════════════════════ */
+#s-theatre .arch{background:linear-gradient(180deg,#6B1208 0%,#8B1A0A 45%,#9a1e0c 70%,transparent 100%)}
+#s-theatre .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 200px 100px at 12% 40%,#7a1208 0%,transparent 65%),
+    radial-gradient(ellipse 240px 120px at 38% 30%,#9a1e0c 0%,transparent 65%),
+    radial-gradient(ellipse 260px 130px at 65% 38%,#7a1208 0%,transparent 65%),
+    radial-gradient(ellipse 200px 90px at 88% 25%,#8a1808 0%,transparent 65%),
+    radial-gradient(ellipse 180px 80px at 50% 55%,#5a0e06 0%,transparent 55%);
+}
+#s-theatre .platform{background:#5a0e06}
+#s-theatre .platform.left::before,#s-theatre .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 150px 200px at 60% 0%,#7a1208 0%,#4a0a04 100%);
+}
+#s-theatre .track-floor{background:linear-gradient(180deg,#120604 0%,#060200 100%)}
+#s-theatre .tunnel-depth{background:radial-gradient(ellipse at center,#000 50%,#1a0404 100%)}
+/* rock crack lines on walls */
+#s-theatre .platform.left::after,#s-theatre .platform.right::after{background:#f5c518;opacity:.5}
+/* Spotlight cone */
+#th-spot{
+  position:absolute;
+  top:5%;left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:160px solid transparent;
+  border-right:160px solid transparent;
+  border-top:350px solid rgba(255,200,80,.04);
+  z-index:6;
+  pointer-events:none;
+}
+/* Playbill */
+.playbill{
+  background:#f5ede0;
+  border-radius:2px;
+  overflow:hidden;
+  box-shadow:0 30px 90px rgba(0,0,0,.8);
+}
+.pb-top{background:#1a0f08;padding:14px 20px;text-align:center}
+.pb-over{font-size:.48rem;letter-spacing:.26em;color:#c8a040;text-transform:uppercase;margin-bottom:4px}
+.pb-title{font-size:1.3rem;color:#f5ede0;font-weight:300;font-style:italic}
+.pb-body{padding:16px 20px;max-height:50vh;overflow-y:auto}
+.pb-body::-webkit-scrollbar{width:3px}
+.pb-body::-webkit-scrollbar-thumb{background:#d8c8b0}
+.pb-lbl{font-size:.46rem;letter-spacing:.22em;color:#8a7858;text-transform:uppercase;margin:10px 0 6px;font-weight:500}
+.pb-p{font-size:.7rem;color:#3a2a1a;line-height:1.85}
+.pb-quote{font-style:italic;font-size:.75rem;color:#4a3520;border-left:2px solid #c8a040;padding-left:10px;margin:10px 0;line-height:1.75}
+.tl-row{display:grid;grid-template-columns:3.5rem 1fr;gap:8px;padding:6px 0;border-bottom:1px solid #ece0ce}
+.tl-row:last-child{border-bottom:none}
+.tl-yr{font-size:.54rem;color:#8a7858;letter-spacing:.06em;padding-top:2px}
+.tl-ro{font-size:.68rem;color:#2a1a0a;font-weight:500;margin-bottom:1px}
+.tl-de{font-size:.6rem;color:#6a5a48;line-height:1.6}
+.pb-btn{display:block;width:100%;padding:10px;background:#1a0f08;border:none;color:#c8a040;font-family:'Poppins',sans-serif;font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .2s;text-align:center}
+.pb-btn:hover{background:#2a1a10;color:#f5c518}
+
+/* ══════════════════════════════════════
+   SCREEN 3 — T-CENTRALEN BLUE (Dev)
+══════════════════════════════════════ */
+#s-dev .arch{background:linear-gradient(180deg,#0d2040 0%,#1a3060 40%,#2040a0 65%,transparent 100%)}
+#s-dev .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 220px 100px at 15% 38%,#182858 0%,transparent 65%),
+    radial-gradient(ellipse 200px 90px at 42% 28%,#2040a0 0%,transparent 60%),
+    radial-gradient(ellipse 240px 110px at 70% 35%,#1a3070 0%,transparent 65%),
+    radial-gradient(ellipse 180px 80px at 90% 22%,#182858 0%,transparent 65%);
+}
+#s-dev .platform{background:#0d1830}
+#s-dev .platform.left::before,#s-dev .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 150px 200px at 60% 0%,#1a2848 0%,#080c18 100%);
+}
+#s-dev .track-floor{background:linear-gradient(180deg,#060810 0%,#020408 100%)}
+#s-dev .tunnel-depth{background:radial-gradient(ellipse at center,#000 50%,#040818 100%)}
+#s-dev .platform.left::after,#s-dev .platform.right::after{background:#f5c518;opacity:.4}
+/* Terminal card */
+.term-card{background:#060810;border:1px solid #1a2850;border-radius:4px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.8)}
+.term-bar{background:#0d1428;padding:9px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #1a2850}
+.tdot{width:9px;height:9px;border-radius:50%}
+.term-title{font-size:.54rem;letter-spacing:.16em;color:#3a5880;margin-left:auto;text-transform:uppercase}
+.term-body{padding:14px 16px;max-height:52vh;overflow-y:auto}
+.term-body::-webkit-scrollbar{width:3px}
+.term-body::-webkit-scrollbar-thumb{background:#1a2850}
+.tl2{display:block;font-size:.68rem;line-height:2;font-family:'Courier New',monospace}
+.c-p{color:#6090d0}.c-c{color:#3a5880}.c-v{color:#90d890}.c-s{color:#c0a060}.c-k{color:#c060c0}.c-n{color:#60b0d0}
+.proj-row{display:grid;grid-template-columns:1.8rem 1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid #0e1828;align-items:center;cursor:pointer;text-decoration:none;transition:background .15s}
+.proj-row:hover{background:rgba(26,40,80,.3)}
+.proj-row:last-child{border-bottom:none}
+.pn{font-size:.8rem;color:#1e3060;font-style:italic}
+.pt{font-size:.7rem;color:#b0c8e8;margin-bottom:1px}
+.ps{font-size:.54rem;color:#3a5880}
+.pa{font-size:.7rem;color:#2a4070;transition:all .2s}
+.proj-row:hover .pa{color:#6090d0;transform:translateX(3px)}
+.term-btn{display:block;width:100%;margin-top:8px;padding:9px;background:#0d1428;border:1px solid #1a2850;color:#4a6aaa;font-family:'Poppins',sans-serif;font-size:.54rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center;border-radius:3px}
+.term-btn:hover{background:#141e3a;color:#90c0ff}
+
+/* ══════════════════════════════════════
+   SCREEN 4 — KUNGSTRÄDGÅRDEN (Artist)
+   Dark green cave, archaeological
+══════════════════════════════════════ */
+#s-artist .arch{background:linear-gradient(180deg,#061008 0%,#0d2010 40%,#183818 65%,transparent 100%)}
+#s-artist .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 220px 100px at 14% 40%,#0d1e0a 0%,transparent 65%),
+    radial-gradient(ellipse 200px 90px at 40% 28%,#1a3818 0%,transparent 60%),
+    radial-gradient(ellipse 240px 110px at 68% 38%,#102010 0%,transparent 65%),
+    radial-gradient(ellipse 190px 85px at 90% 22%,#0d1e0a 0%,transparent 65%),
+    radial-gradient(ellipse 300px 60px at 50% 65%,#061008 0%,transparent 55%);
+}
+#s-artist .platform{background:#071008}
+#s-artist .platform.left::before,#s-artist .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 150px 200px at 60% 0%,#102010 0%,#040804 100%);
+}
+#s-artist .track-floor{background:linear-gradient(180deg,#040804 0%,#020402 100%)}
+#s-artist .tunnel-depth{background:radial-gradient(ellipse at center,#000 50%,#030804 100%)}
+#s-artist .platform.left::after,#s-artist .platform.right::after{background:#3a8030;opacity:.7}
+/* Artist card */
+.art-card{background:rgba(6,16,8,.9);border:1px solid #1a3818;border-radius:3px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.85)}
+.art-head{padding:14px 18px;text-align:center;border-bottom:1px solid #0e2010}
+.art-over{font-size:.48rem;letter-spacing:.26em;color:#4a8040;text-transform:uppercase;margin-bottom:5px}
+.art-title{font-size:1.3rem;color:#f0ead8;font-weight:300;font-style:italic}
+.art-title em{color:#7ac870}
+.art-body{padding:14px 18px;max-height:52vh;overflow-y:auto}
+.art-body::-webkit-scrollbar{width:3px}
+.art-body::-webkit-scrollbar-thumb{background:#1a3818}
+.art-quote{font-style:italic;font-size:.72rem;color:rgba(245,237,224,.55);border-left:2px solid #2a6020;padding-left:10px;margin-bottom:12px;line-height:1.8}
+.art-tl{display:flex;flex-direction:column}
+.at-row{display:grid;grid-template-columns:3.8rem 1fr;gap:8px;padding:7px 0;border-bottom:1px solid #0d1e0a}
+.at-row:last-child{border-bottom:none}
+.at-yr{font-size:.52rem;color:#3a6030;letter-spacing:.08em;padding-top:2px}
+.at-ro{font-size:.7rem;color:#e0d8c8;font-weight:400;margin-bottom:1px}
+.at-de{font-size:.6rem;color:rgba(245,237,224,.4);line-height:1.6}
+.art-btn{display:block;width:100%;padding:9px;background:rgba(14,40,14,.6);border:none;border-top:1px solid #0e2010;color:#4a8040;font-family:'Poppins',sans-serif;font-size:.54rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center}
+.art-btn:hover{background:#0e2810;color:#7ac870}
+
+/* ══════════════════════════════════════
+   SCREEN 5 — SOLNA CENTRUM (Contact)
+   Dramatic red-orange warm light
+══════════════════════════════════════ */
+#s-contact .arch{background:linear-gradient(180deg,#1a0804 0%,#3a1008 40%,#c84010 65%,transparent 100%)}
+#s-contact .arch::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:
+    radial-gradient(ellipse 300px 120px at 50% 75%,#e86020 0%,transparent 60%),
+    radial-gradient(ellipse 200px 90px at 18% 45%,#c84010 0%,transparent 65%),
+    radial-gradient(ellipse 180px 80px at 82% 38%,#c84010 0%,transparent 65%),
+    radial-gradient(ellipse 160px 70px at 12% 22%,#3a1008 0%,transparent 70%),
+    radial-gradient(ellipse 140px 60px at 88% 18%,#3a1008 0%,transparent 70%);
+}
+#s-contact .platform{background:#1a0804}
+#s-contact .platform.left::before,#s-contact .platform.right::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 150px 200px at 60% 0%,#3a1008 0%,#0a0402 100%);
+}
+#s-contact .track-floor{background:linear-gradient(180deg,#0e0402 0%,#060200 100%)}
+#s-contact .tunnel-depth{background:radial-gradient(ellipse at center,#000 50%,#0a0200 100%)}
+#s-contact .platform.left::after,#s-contact .platform.right::after{background:#e86020;opacity:.4}
+/* warm glow on arch */
+#s-contact .arch::after{
+  content:'';position:absolute;bottom:0;left:20%;right:20%;height:40%;
+  background:radial-gradient(ellipse at 50% 100%,rgba(232,96,32,.12) 0%,transparent 70%);
+}
+/* Contact card */
+.cont-card{
+  background:rgba(10,4,2,.88);
+  border:1px solid rgba(200,64,16,.2);
+  border-radius:3px;
+  padding:22px 24px;
+  box-shadow:0 30px 90px rgba(0,0,0,.85);
+}
+.cont-over{font-size:.5rem;letter-spacing:.26em;color:#9a4820;text-transform:uppercase;margin-bottom:12px;text-align:center}
+.cont-msg{font-style:italic;font-size:clamp(.95rem,2.2vw,1.35rem);color:#f0e8d8;line-height:1.65;margin-bottom:20px;font-weight:300;text-align:center}
+.cont-msg em{color:#e8a060}
+.cont-r{display:grid;grid-template-columns:5rem 1fr;gap:10px;padding:7px 0;border-bottom:1px solid rgba(200,64,16,.12);align-items:baseline}
+.cont-r:first-of-type{border-top:1px solid rgba(200,64,16,.12)}
+.cont-l{font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;color:#5a2810}
+.cont-v a{font-size:.72rem;color:rgba(245,237,224,.55);text-decoration:none;transition:color .2s;border-bottom:1px solid transparent;padding-bottom:1px}
+.cont-v a:hover{color:#e8a060;border-bottom-color:#e8a060}
+.avail{display:inline-flex;align-items:center;gap:6px;font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:#7ac870;margin-top:10px}
+.adot{width:5px;height:5px;border-radius:50%;background:#7ac870;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.cont-back{display:block;width:100%;margin-top:12px;padding:9px;background:rgba(58,16,8,.5);border:1px solid rgba(200,64,16,.25);color:#804020;font-family:'Poppins',sans-serif;font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;text-align:center;transition:all .2s;border-radius:2px}
+.cont-back:hover{background:rgba(58,16,8,.9);color:#e8a060}
+
+/* Ceiling light strips — shared */
+.light-strip{
+  position:absolute;
+  z-index:8;
+  pointer-events:none;
+}
+/* Panel in animation */
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.anim{animation:up .65s cubic-bezier(.22,1,.36,1) forwards}
+ 
